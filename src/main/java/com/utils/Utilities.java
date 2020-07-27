@@ -12,7 +12,7 @@ public class Utilities {
     private final static String WINDOWS_INVALID_PATH = "c:\\windows\\system32\\";
 
     public static Path getPath(String path) {
-        // special logic to prevent trying to access system32
+        //Special logic to prevent trying to access system32
         if(path.toLowerCase().startsWith(WINDOWS_INVALID_PATH))
         {
             String filename = path.substring(WINDOWS_INVALID_PATH.length());
