@@ -16,9 +16,12 @@ public class BotConfig {
     public void load() {
         try {
             valid = false;
+            //Get the location of the config file.
+            //Config file is actually called reference.conf.
             path = Utilities.getPath(System.getProperty("config.file", System.getProperty("config", "config.txt")));
             if(path.toFile().exists())
             {
+                //Make sure the file is not empty.
                 if(System.getProperty("config.file") == null)
                     System.setProperty("config.file", System.getProperty("config", "config.txt"));
                 ConfigFactory.invalidateCaches();
@@ -32,6 +35,18 @@ public class BotConfig {
             prefix = conf.getString("prefix");
             game = conf.getString("game");
             help = conf.getString("help");
+
+            //Check for valid bot token.
+            if(token == null || token.isEmpty()) {
+                System.out.println("Please provide a valid bot token in " + path.toAbsolutePath().toString() + ".");
+                return;
+            }
+
+            // Validate owner ID.
+            if(owner <= 0) {
+                System.out.println("Please provide a valid owner ID in " + path.toAbsolutePath().toString() + ".");
+                return;
+            }
 
             valid = true;
         }

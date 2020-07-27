@@ -15,18 +15,14 @@ public class Guildmarm {
     public static void main(String[] args) throws IOException, LoginException {
         //This might be necessary when exported to a JAR, the paths might switch up.
         //System.out.println(System.getProperty("user.dir"));
-//        List<String> keys = Files.readAllLines(Paths.get("src/main/info.txt"));
-//        String tok = keys.get(0);
-//        String owner = keys.get(1);
-//        String auth = keys.get(2);
-//        String reply = keys.get(3);
+        //Load based on a configuration file
         BotConfig config = new BotConfig();
         config.load();
         if(!config.isValid()) {
             System.out.println("Invalid configuration");
             return;
         }
-//TODO: Finish BotConfig based on JMusicBot
+
         EventWaiter waiter = new EventWaiter();
         SettingsManager settings = new SettingsManager();
         Bot bot = new Bot(waiter, config, settings);
@@ -34,6 +30,7 @@ public class Guildmarm {
                 .setPrefix(config.getPrefix())
                 .setOwnerId(Long.toString(config.getOwner()))
                 .setHelpWord(config.getHelp())
+                .setActivity(Activity.watching(config.getGame()))
         ;
 
         JDABuilder.createDefault(config.getToken())
