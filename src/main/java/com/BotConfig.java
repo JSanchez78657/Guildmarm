@@ -31,7 +31,7 @@ public class BotConfig {
 
             //Load values
             token = conf.getString("token");
-            key = conf.getString("key");
+            owner = Long.parseLong(conf.getString("owner"));
             prefix = conf.getString("prefix");
             game = conf.getString("game");
             help = conf.getString("help");

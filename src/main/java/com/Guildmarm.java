@@ -1,5 +1,6 @@
 package com;
 
+import com.commands.scheduling.ScheduleCommand;
 import com.jagrosh.jdautilities.command.CommandClientBuilder;
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 import com.settings.SettingsManager;
@@ -31,6 +32,10 @@ public class Guildmarm {
                 .setOwnerId(Long.toString(config.getOwner()))
                 .setHelpWord(config.getHelp())
                 .setActivity(Activity.watching(config.getGame()))
+                .setGuildSettingsManager(settings)
+                .addCommands(
+                        new ScheduleCommand(bot)
+                )
         ;
 
         JDABuilder.createDefault(config.getToken())

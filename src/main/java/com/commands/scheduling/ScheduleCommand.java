@@ -1,16 +1,22 @@
 package com.commands.scheduling;
 
+import com.Bot;
+import com.commands.GenericCommand;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 
-public class ScheduleCommand extends Command {
+public class ScheduleCommand extends GenericCommand {
 
-    private String key;
-    private String replyChannel;
-
-    public ScheduleCommand(String key) { this.key = key; }
+    public ScheduleCommand(Bot bot) {
+        super(bot);
+        this.name = "schedule";
+        this.arguments = "<event_name|date_time>";
+        this.help = "schedules given event.";
+    }
 
     @Override
-    protected void execute(CommandEvent event) {
+    public void execCmd(CommandEvent event) {
+        //TODO: FIX THE FUCKING SERVERSETTINGS LOADING
+        System.out.println("command!");
     }
 }
