@@ -4,6 +4,8 @@ import com.commands.scheduling.ScheduleCommand;
 import com.jagrosh.jdautilities.command.CommandClientBuilder;
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 import com.settings.SettingsManager;
+import net.dv8tion.jda.api.AccountType;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
@@ -38,9 +40,22 @@ public class Guildmarm {
                 )
         ;
 
-        JDABuilder.createDefault(config.getToken())
-                .setStatus(OnlineStatus.ONLINE)
-                .addEventListeners(waiter, builder.build())
-                .build();
+        try {
+            JDA jda = JDABuilder.createDefault(config.getToken())
+                    .setStatus(OnlineStatus.ONLINE)
+                    .addEventListeners(waiter, builder.build())
+                    .build();
+            bot.setJda(jda);
+        }
+        catch (LoginException ex)
+        {
+            System.out.println("LoginException");
+            System.exit(1);
+        }
+        catch (IllegalArgumentException ex)
+        {
+            System.out.println("IllegalArgs");
+            System.exit(1);
+        }
     }
 }

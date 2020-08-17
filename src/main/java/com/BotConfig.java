@@ -35,6 +35,7 @@ public class BotConfig {
             prefix = conf.getString("prefix");
             game = conf.getString("game");
             help = conf.getString("help");
+            key = conf.getString("database");
 
             //Check for valid bot token.
             if(token == null || token.isEmpty()) {

@@ -3,9 +3,11 @@ package com.settings;
 import com.jagrosh.jdautilities.command.GuildSettingsManager;
 import com.utils.Utilities;
 import net.dv8tion.jda.api.entities.Guild;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.annotation.Nullable;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.HashMap;
@@ -22,7 +24,7 @@ public class SettingsManager implements GuildSettingsManager {
                 JSONObject obj = savedSettings.getJSONObject(key);
                 settings.put(Long.parseLong(key), new Settings(
                         this,
-                        obj.has("text_channel") ? obj.getString("text_channel") : null,
+                        obj.has("schedule_channel") ? obj.getString("schedule_channel") : null,
                         obj.has("voice_channel") ? obj.getString("voice_channel") : null
                 ));
             });
@@ -50,10 +52,10 @@ public class SettingsManager implements GuildSettingsManager {
         settings.keySet().forEach((key) -> {
             JSONObject o = new JSONObject();
             Settings s = settings.get(key);
-            if(s.getTextId()!=0)
-                o.put("text_channel_id", Long.toString(s.getTextId()));
+            if(s.getScheduleId()!=0)
+                o.put("schedule_channel", Long.toString(s.getScheduleId()));
             if(s.getVoiceId()!=0)
-                o.put("voice_channel_id", Long.toString(s.getVoiceId()));
+                o.put("voice_channel", Long.toString(s.getVoiceId()));
             obj.put(Long.toString(key), o);
         });
         try {

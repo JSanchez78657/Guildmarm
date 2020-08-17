@@ -8,28 +8,28 @@ import net.dv8tion.jda.api.entities.VoiceChannel;
 public class Settings implements GuildSettingsProvider {
 
     private final SettingsManager manager;
-    private long textId;
+    private long scheduleId;
     private long voiceId;
 
-    public Settings(SettingsManager manager, String textId, String voiceId) {
+    public Settings(SettingsManager manager, String scheduleId, String voiceId) {
         this.manager = manager;
-        try { this.textId = Long.parseLong(textId); }
-        catch (NumberFormatException e) { this.textId = 0; }
+        try { this.scheduleId = Long.parseLong(scheduleId); }
+        catch (NumberFormatException e) { this.scheduleId = 0; }
         try { this.voiceId = Long.parseLong(voiceId); }
         catch (NumberFormatException e) { this.voiceId = 0; }
     }
 
 
-    public long getTextId() {
-        return textId;
+    public long getScheduleId() {
+        return scheduleId;
     }
 
-    public void setTextId(long textId) {
-        this.textId = textId;
+    public void setScheduleId(long scheduleId) {
+        this.scheduleId = scheduleId;
     }
 
-    public TextChannel getTextChannel(Guild guild) {
-         return (guild == null) ? null : guild.getTextChannelById(textId);
+    public TextChannel getScheduleChannel (Guild guild) {
+         return (guild == null) ? null : guild.getTextChannelById(scheduleId);
     }
 
     public long getVoiceId() {
@@ -46,6 +46,6 @@ public class Settings implements GuildSettingsProvider {
 
     @Override
     public String toString() {
-        return "Setting: \nTextId: " + textId + "\nVoiceId: " + voiceId;
+        return "Setting: \nTextId: " + scheduleId + "\nVoiceId: " + voiceId;
     }
 }

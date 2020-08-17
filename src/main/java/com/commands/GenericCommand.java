@@ -19,14 +19,13 @@ public abstract class GenericCommand extends Command {
     @Override
     protected void execute(CommandEvent event) {
         Settings settings = event.getClient().getSettingsFor(event.getGuild());
-        TextChannel channel = settings.getTextChannel(event.getGuild());
-        System.out.println(settings);
+//        TextChannel channel = settings.getTextChannel(event.getGuild());
         //Checks if the command is enabled in channel.
-        if(channel != null && channel != event.getTextChannel()) {
-            try { event.getMessage().delete().queue(); }
-            catch (PermissionException e) { System.out.println("Permission denied."); }
-            event.replyInDm(event.getClient().getError() + "You must be in " + channel.getAsMention() + " to use that command.");
-        }
+//        if(channel != null && channel != event.getTextChannel()) {
+//            try { event.getMessage().delete().queue(); }
+//            catch (PermissionException e) { System.out.println("Permission denied."); }
+//            event.replyInDm(event.getClient().getError() + "You must be in " + channel.getAsMention() + " to use that command.");
+//        }
         execCmd(event);
     }
 
