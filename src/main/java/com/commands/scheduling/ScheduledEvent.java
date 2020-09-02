@@ -46,22 +46,24 @@ public class ScheduledEvent {
 
     //Month Day XX:XX AM/PM
     private ZonedDateTime getDate(String raw) {
+        raw = raw.trim();
         String[] separated = raw.split(" ");
         String period = separated[3].toUpperCase();
         ZonedDateTime now = ZonedDateTime.now();
         int month = Integer.parseInt(separated[0]),
-                day = Integer.parseInt(separated[1]),
-                hour = getMilHour(separated[2], period),
-                minute = Integer.parseInt(separated[2].substring(separated[2].indexOf(":") + 1));
-        return ZonedDateTime.of(now.getYear(), month, day, hour, minute, 0, 0, now.getZone());
+            day = Integer.parseInt(separated[1]),
+            hour = getMilHour(separated[2], period),
+            minute = Integer.parseInt(separated[2].substring(separated[2].indexOf(":") + 1)),
+            year = (month >= now.getMonthValue()) ? now.getYear() : now.getYear() + 1;
+        return ZonedDateTime.of(year, month, day, hour, minute, 0, 0, now.getZone());
     }
 
     private ZonedDateTime getDateFormatted(String date, int hour, int minute) {
         //Saturday, October 19
-        String[] seperated = date.split(" ");
+        String[] separated = date.split(" ");
         ZonedDateTime now = ZonedDateTime.now();
-        int month = getMonth(seperated[1]),
-                day = Integer.parseInt(seperated[2]);
+        int month = getMonth(separated[1]),
+            day = Integer.parseInt(separated[2]);
         return ZonedDateTime.of(now.getYear(), month, day, hour, minute, 0, 0, now.getZone());
     }
 
@@ -69,7 +71,7 @@ public class ScheduledEvent {
         String[] hold = time.split(":");
         int hour = Integer.parseInt(hold[0]);
         if(hour == 12) hour = 0;
-        return hour + ((period.equals("PM")) ? 12 : 0);
+        return hour + ((period.toUpperCase().equals("PM")) ? 12 : 0);
     }
 
     private int getMonth(String name) {
@@ -109,11 +111,11 @@ public class ScheduledEvent {
     public String formattedString() {
         String period = getPeriod(time.getHour());
         StringBuilder stringBuilder = new StringBuilder();
-        int hour = time.getHour() - ((period.equals("PM")) ? 12 : 0);
+        int hour = (time.getHour() > 12) ? time.getHour() - 12 : time.getHour();
         String hold =
-                nameHeader + name + "\n" +
-                        timeHeader + hour + ":" + convertMin(time.getMinute()) + " " + period + " PST\n" +
-                        dateHeader + toTitleCase(time.getDayOfWeek().toString()) + ", " + toTitleCase(time.getMonth().toString()) + " " + time.getDayOfMonth() + "\n";
+            nameHeader + name + "\n" +
+            timeHeader + hour + ":" + convertMin(time.getMinute()) + " " + period + " PST\n" +
+            dateHeader + toTitleCase(time.getDayOfWeek().toString()) + ", " + toTitleCase(time.getMonth().toString()) + " " + time.getDayOfMonth() + "\n";
         stringBuilder.append(hold);
         if(!attending.isEmpty()) {
             List<Ticket> list = new ArrayList<>(attending.values());
