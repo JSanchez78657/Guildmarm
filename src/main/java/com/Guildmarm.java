@@ -20,9 +20,10 @@ public class Guildmarm {
         //This might be necessary when exported to a JAR, the paths might switch up.
         //System.out.println(System.getProperty("user.dir"));
         //Load based on a configuration file
+        JDA jda = null;
         EventWaiter waiter = new EventWaiter();
         SettingsManager settings = new SettingsManager();
-        ScheduleTimer timer = new ScheduleTimer();
+        ScheduleTimer timer = new ScheduleTimer(jda);
         BotConfig config = new BotConfig();
         config.load();
         if(!config.isValid()) {
@@ -43,7 +44,7 @@ public class Guildmarm {
             );
 
         try {
-            JDA jda = JDABuilder.createDefault(config.getToken())
+            jda = JDABuilder.createDefault(config.getToken())
                     .setStatus(OnlineStatus.ONLINE)
                     .addEventListeners(waiter, builder.build(), timer)
                     .build();

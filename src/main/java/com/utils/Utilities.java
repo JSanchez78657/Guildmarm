@@ -43,8 +43,6 @@ public class Utilities {
     public static HashMap<String, ScheduledEvent> getStartingEvents(ZonedDateTime time) {
         HashMap<String, ScheduledEvent> events = new HashMap<>();
         time = Utilities.simpleDate(time);
-        //For some reason, trying to put in the characters manually messes up, so you need to URL encode them.
-        //%7B = {, %7D = }, %93 = ", %7F = ' '
         try {
             JSONArray hold = Unirest
                 .get("https://sophiadb-1e63.restdb.io/rest/events?q=" + URLEncoder.encode("{\"DateTime\": \"" + time.toString() + "\"}", "UTF-8"))
@@ -57,7 +55,6 @@ public class Utilities {
             for (Object obj : hold) {
                 ScheduledEvent event = parseEvent(obj.toString());
                 events.put(event.getEventId(), event);
-                System.out.println(obj.toString());
             }
             return events;
         }
@@ -70,6 +67,7 @@ public class Utilities {
     public static ScheduledEvent pushEvent(ScheduledEvent event, String key) {
         String body = "{" +
             "\"MessageId\":\"" + event.getEventId() + "\"," +
+            "\"ChannelId\":\"" + event.getChannelId() + "\"," +
             "\"Name\":\"" + event.getName() + "\"," +
             "\"DateTime\":\"" + event.getTime().toString() + "\"," +
             "\"Author\":\"" + event.getAuthor() + "\"" +
@@ -91,6 +89,7 @@ public class Utilities {
         return new ScheduledEvent(
             map.get("_id"),
             map.get("MessageId"),
+            map.get("ChannelId"),
             map.get("Name"),
             ZonedDateTime.parse(map.get("DateTime")),
             map.get("Author")

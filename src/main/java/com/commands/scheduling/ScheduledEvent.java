@@ -1,9 +1,11 @@
 package com.commands.scheduling;
 
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.temporal.ChronoField;
+import java.time.temporal.TemporalAccessor;
+import java.util.*;
 
 public class ScheduledEvent {
 
@@ -16,6 +18,7 @@ public class ScheduledEvent {
     private String name;
     private String author;
     private String eventId;
+    private String channelId;
     private String restId;
     private HashMap<String, Ticket> attending;
 
@@ -35,9 +38,10 @@ public class ScheduledEvent {
         this.attending = new HashMap<>();
     }
 
-    public ScheduledEvent(String restId, String eventId, String name, ZonedDateTime time, String author) {
+    public ScheduledEvent(String restId, String eventId, String channelId, String name, ZonedDateTime time, String author) {
         this.restId = restId;
         this.eventId = eventId;
+        this.channelId = channelId;
         this.name = name;
         this.time = time;
         this.author = author;
@@ -45,17 +49,14 @@ public class ScheduledEvent {
     }
 
     //Month Day XX:XX AM/PM
-    private ZonedDateTime getDate(String raw) {
-        raw = raw.trim();
-        String[] separated = raw.split(" ");
-        String period = separated[3].toUpperCase();
-        ZonedDateTime now = ZonedDateTime.now();
-        int month = Integer.parseInt(separated[0]),
-            day = Integer.parseInt(separated[1]),
-            hour = getMilHour(separated[2], period),
-            minute = Integer.parseInt(separated[2].substring(separated[2].indexOf(":") + 1)),
-            year = (month >= now.getMonthValue()) ? now.getYear() : now.getYear() + 1;
-        return ZonedDateTime.of(year, month, day, hour, minute, 0, 0, now.getZone());
+    private ZonedDateTime getDate(String raw){
+        DateTimeFormatter formatter = new DateTimeFormatterBuilder()
+                .appendPattern("M d h:m a")
+                .parseDefaulting(ChronoField.YEAR, ZonedDateTime.now().getYear())
+                .toFormatter(Locale.US);
+        LocalDateTime hold = LocalDateTime.parse(raw.trim().toUpperCase(), formatter);
+        if(hold.isBefore(LocalDateTime.now())) hold = hold.plusYears(1);
+        return ZonedDateTime.from(hold.atZone(ZoneId.systemDefault()));
     }
 
     private ZonedDateTime getDateFormatted(String date, int hour, int minute) {
@@ -67,9 +68,7 @@ public class ScheduledEvent {
         return ZonedDateTime.of(now.getYear(), month, day, hour, minute, 0, 0, now.getZone());
     }
 
-    private int getMilHour(String time, String period) {
-        String[] hold = time.split(":");
-        int hour = Integer.parseInt(hold[0]);
+    private int getMilHour(int hour, String period) {
         if(hour == 12) hour = 0;
         return hour + ((period.toUpperCase().equals("PM")) ? 12 : 0);
     }
@@ -114,8 +113,8 @@ public class ScheduledEvent {
         int hour = (time.getHour() > 12) ? time.getHour() - 12 : time.getHour();
         String hold =
             nameHeader + name + "\n" +
-            timeHeader + hour + ":" + convertMin(time.getMinute()) + " " + period + " PST\n" +
-            dateHeader + toTitleCase(time.getDayOfWeek().toString()) + ", " + toTitleCase(time.getMonth().toString()) + " " + time.getDayOfMonth() + "\n";
+            timeHeader + ((hour == 0) ? 12 : hour) + ":" + convertMin(time.getMinute()) + " " + period + " PST\n" +
+            dateHeader + toTitleCase(time.getDayOfWeek().toString()) + ", " + toTitleCase(time.getMonth().toString()) + " " + time.getDayOfMonth() + ", " + time.getYear() + "\n";
         stringBuilder.append(hold);
         if(!attending.isEmpty()) {
             List<Ticket> list = new ArrayList<>(attending.values());
@@ -150,4 +149,8 @@ public class ScheduledEvent {
     public void setEventId(String eventId) { this.eventId = eventId; }
 
     public void setRestId(String restId) { this.restId = restId; }
+
+    public String getChannelId() { return channelId; }
+
+    public void setChannelId(String channelId) { this.channelId = channelId; }
 }
