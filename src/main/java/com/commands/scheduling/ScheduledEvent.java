@@ -27,7 +27,7 @@ public class ScheduledEvent {
         this.time = getDate(dateTime);
         this.author = author;
         this.attending = new HashMap<>();
-        for(Ticket ticket : attendees) { this.attending.put(ticket.getKey(), ticket); }
+        for(Ticket ticket : attendees) { this.attending.put(ticket.getRestId(), ticket); }
     }
 
     public ScheduledEvent(String eventId, String name, ZonedDateTime time, String author) {
@@ -91,14 +91,14 @@ public class ScheduledEvent {
         }
     }
 
-    public boolean hasUser(Ticket ticket) { return attending.containsKey(ticket.getKey()); }
+    public boolean hasUser(Ticket ticket) { return attending.containsKey(ticket.getRestId()); }
 
     public void addUser(Ticket attendee) {
-        attending.put(attendee.getKey(), attendee);
+        attending.put(attendee.getRestId(), attendee);
     }
 
     public void removeUser(Ticket attendee) {
-        attending.remove(attendee.getKey());
+        attending.remove(attendee.getRestId());
     }
 
     @Override
@@ -153,4 +153,6 @@ public class ScheduledEvent {
     public String getChannelId() { return channelId; }
 
     public void setChannelId(String channelId) { this.channelId = channelId; }
+
+    public void setAttending(HashMap<String, Ticket> attending) { this.attending =  attending; }
 }

@@ -54,7 +54,7 @@ public class ScheduleCommand extends GenericCommand {
             sendChannel.sendMessage(scheduledEvent.formattedString()).queue(m -> {
                 scheduledEvent.setEventId(m.getId());
                 scheduledEvent.setChannelId(sendChannel.getId());
-                Utilities.pushEvent(scheduledEvent, bot.getConfig().getKey());
+                Utilities.pushEvent(bot.getConfig().getKey(), scheduledEvent);
             });
         }
         catch(DateTimeException d) {

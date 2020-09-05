@@ -1,5 +1,7 @@
-package com.commands.scheduling;
+package com.listeners;
 
+import com.Bot;
+import com.commands.scheduling.ScheduledEvent;
 import com.utils.Utilities;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.events.ReadyEvent;
@@ -18,14 +20,13 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-public class ScheduleTimer extends ListenerAdapter {
+public class EventTimerListener extends ListenerAdapter {
 
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-    private JDA jda;
+    private final Bot bot;
 
-    public ScheduleTimer(JDA jda) {
-        super();
-        this.jda = jda;
+    public EventTimerListener(Bot bot) {
+        this.bot = bot;
     }
 
     @Override
@@ -35,7 +36,7 @@ public class ScheduleTimer extends ListenerAdapter {
         //In this case, it is checking to see if any events are scheduled at the given time.
         final Runnable check = () -> {
             ZonedDateTime now = ZonedDateTime.now();
-            HashMap<String, ScheduledEvent> events = Utilities.getStartingEvents(now);
+            HashMap<String, ScheduledEvent> events = Utilities.getStartingEvents(bot.getConfig().getKey(),now);
             if (events != null)
                 events.forEach((k,e) -> {
                     Objects.requireNonNull(event.getJDA().getTextChannelById(e.getChannelId()))
