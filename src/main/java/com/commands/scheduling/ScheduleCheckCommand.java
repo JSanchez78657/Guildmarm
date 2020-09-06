@@ -9,6 +9,7 @@ import com.utils.Utilities;
 
 import java.time.ZonedDateTime;
 import java.util.HashMap;
+import java.util.Objects;
 
 public class ScheduleCheckCommand extends GenericCommand {
 
@@ -23,10 +24,13 @@ public class ScheduleCheckCommand extends GenericCommand {
     public void execCmd(CommandEvent event) {
         ZonedDateTime now = ZonedDateTime.now();
         System.out.println("Checking events... Time: " + now.toString());
-        HashMap<String, ScheduledEvent> events = Utilities.getStartingEvents(bot.getConfig().getKey(), now);
-        StringBuilder hold = new StringBuilder();
-        events.forEach((k,e) -> hold.append(e.toString()).append("\n"));
-        System.out.println(hold.toString());
-        event.reply(hold.toString());
+        HashMap<String, ScheduledEvent> events = Utilities.getStartingEvents(bot.getConfig().getKey(),now);
+        if (events != null)
+            events.forEach((k,e) -> {
+                Objects.requireNonNull(event.getJDA().getTextChannelById(e.getChannelId()))
+                        .sendMessage("Event Starting: " + e.getName())
+                        .queue();
+                System.out.println(e.toString());
+            });
     }
 }

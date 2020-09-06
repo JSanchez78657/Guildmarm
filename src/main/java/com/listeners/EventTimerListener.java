@@ -2,6 +2,7 @@ package com.listeners;
 
 import com.Bot;
 import com.commands.scheduling.ScheduledEvent;
+import com.commands.scheduling.Ticket;
 import com.utils.Utilities;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.events.ReadyEvent;
@@ -39,9 +40,14 @@ public class EventTimerListener extends ListenerAdapter {
             HashMap<String, ScheduledEvent> events = Utilities.getStartingEvents(bot.getConfig().getKey(),now);
             if (events != null)
                 events.forEach((k,e) -> {
+                    HashMap<String, Ticket> tickets = Utilities.getAttendeesByEvent(bot.getConfig().getKey(), e.getRestId());
+                    StringBuilder attending = new StringBuilder();
+                    Objects.requireNonNull(tickets).forEach((tk, t) -> attending.append(t.getMention()));
+                    attending.append("\n");
                     Objects.requireNonNull(event.getJDA().getTextChannelById(e.getChannelId()))
-                            .sendMessage("Event Starting: " + e.getName())
+                            .sendMessage(attending.toString() + e.getName() + " is starting!")
                             .queue();
+                    //TODO: Put the strikethroughs on an event that has begun.
                 });
         };
         scheduler.scheduleAtFixedRate(check, 0, 1, TimeUnit.MINUTES);

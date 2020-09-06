@@ -1,16 +1,40 @@
 package com.commands.scheduling;
 
+import kong.unirest.json.JSONObject;
+
 public class Ticket {
 
-    private String restId, userId;
+    private String restId, eventId, userId;
 
-    public Ticket(String restId, String userId) {
-        this.restId = restId;
+    public Ticket(String eventId, String userId) {
+        this.eventId = eventId;
         this.userId = userId;
+    }
+
+    public Ticket(JSONObject json) {
+        this.restId = json.get("_id").toString();
+        this.eventId = json.get("EventId").toString();
+        this.userId = json.get("UserId").toString();
     }
 
     public String getMention() {
         return "<@" + getUserId() + ">";
+    }
+
+    public String getEventId() {
+        return eventId;
+    }
+
+    public void setEventId(String eventId) {
+        this.eventId = eventId;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public String getRestId() {
@@ -21,11 +45,5 @@ public class Ticket {
         this.restId = restId;
     }
 
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
+    public String key() { return this.eventId.concat(this.userId); }
 }

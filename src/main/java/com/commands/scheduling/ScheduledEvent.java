@@ -1,10 +1,13 @@
 package com.commands.scheduling;
 
+import com.utils.Utilities;
+import jdk.jshell.execution.Util;
+import kong.unirest.json.JSONObject;
+
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
-import java.time.temporal.TemporalAccessor;
 import java.util.*;
 
 public class ScheduledEvent {
@@ -17,46 +20,34 @@ public class ScheduledEvent {
     private ZonedDateTime time;
     private String name;
     private String author;
-    private String eventId;
+    private String messageId;
     private String channelId;
     private String restId;
-    private HashMap<String, Ticket> attending;
+    private HashMap<String, Ticket> attending = new HashMap<>();
 
-    public ScheduledEvent(String name, String dateTime, String author, Ticket... attendees) {
+    public ScheduledEvent(String name, ZonedDateTime dateTime, String author, Ticket... attendees) {
         this.name = name;
-        this.time = getDate(dateTime);
+        this.time = dateTime;
         this.author = author;
-        this.attending = new HashMap<>();
-        for(Ticket ticket : attendees) { this.attending.put(ticket.getRestId(), ticket); }
+        for(Ticket ticket : attendees) { this.attending.put(ticket.getEventId(), ticket); }
     }
 
-    public ScheduledEvent(String eventId, String name, ZonedDateTime time, String author) {
-        this.eventId = eventId;
-        this.name = name;
-        this.time = time;
-        this.author = author;
-        this.attending = new HashMap<>();
-    }
-
-    public ScheduledEvent(String restId, String eventId, String channelId, String name, ZonedDateTime time, String author) {
+    public ScheduledEvent(String restId, String messageId, String channelId, String name, ZonedDateTime time, String author) {
         this.restId = restId;
-        this.eventId = eventId;
+        this.messageId = messageId;
         this.channelId = channelId;
         this.name = name;
         this.time = time;
         this.author = author;
-        this.attending = new HashMap<>();
     }
 
-    //Month Day XX:XX AM/PM
-    private ZonedDateTime getDate(String raw){
-        DateTimeFormatter formatter = new DateTimeFormatterBuilder()
-                .appendPattern("M d h:m a")
-                .parseDefaulting(ChronoField.YEAR, ZonedDateTime.now().getYear())
-                .toFormatter(Locale.US);
-        LocalDateTime hold = LocalDateTime.parse(raw.trim().toUpperCase(), formatter);
-        if(hold.isBefore(LocalDateTime.now())) hold = hold.plusYears(1);
-        return ZonedDateTime.from(hold.atZone(ZoneId.systemDefault()));
+    public ScheduledEvent(JSONObject json) {
+        this.restId = json.get("_id").toString();
+        this.messageId = json.get("MessageId").toString();
+        this.channelId = json.get("ChannelId").toString();
+        this.name = json.get("Name").toString();
+        this.time = ZonedDateTime.parse(json.get("DateTime").toString());
+        this.author = json.get("Author").toString();
     }
 
     private ZonedDateTime getDateFormatted(String date, int hour, int minute) {
@@ -91,14 +82,14 @@ public class ScheduledEvent {
         }
     }
 
-    public boolean hasUser(Ticket ticket) { return attending.containsKey(ticket.getRestId()); }
+    public boolean hasUser(Ticket ticket) { return attending.containsKey(ticket.getEventId()); }
 
     public void addUser(Ticket attendee) {
-        attending.put(attendee.getRestId(), attendee);
+        attending.put(attendee.getEventId(), attendee);
     }
 
     public void removeUser(Ticket attendee) {
-        attending.remove(attendee.getRestId());
+        attending.remove(attendee.getEventId());
     }
 
     @Override
@@ -140,13 +131,13 @@ public class ScheduledEvent {
 
     public String getAuthor() { return author; }
 
-    public String getEventId() { return eventId; }
+    public String getMessageId() { return messageId; }
 
     public HashMap<String, Ticket> getAttending() { return attending; }
 
     public String getRestId() { return restId; }
 
-    public void setEventId(String eventId) { this.eventId = eventId; }
+    public void setMessageId(String messageId) { this.messageId = messageId; }
 
     public void setRestId(String restId) { this.restId = restId; }
 

@@ -5,7 +5,7 @@ import com.commands.scheduling.ScheduledEvent;
 import com.commands.scheduling.Ticket;
 import kong.unirest.*;
 import kong.unirest.json.JSONArray;
-import net.dv8tion.jda.api.entities.MessageChannel;
+import kong.unirest.json.JSONObject;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
@@ -13,9 +13,15 @@ import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.DateTimeException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.temporal.ChronoField;
 import java.util.HashMap;
+import java.util.Locale;
 
 public class Utilities {
 
@@ -50,10 +56,12 @@ public class Utilities {
                 .asJson()
                 .getBody()
                 .getArray();
-            for (Object obj : hold) {
-                ScheduledEvent event = parseEvent(obj.toString());
-                events.put(event.getEventId(), event);
-            }
+            hold.forEach((entry) -> {
+                if (entry instanceof JSONObject) {
+                    ScheduledEvent event = new ScheduledEvent((JSONObject) entry);
+                    events.put(event.getRestId(), event);
+                }
+            });
             return events;
         }
         catch (UnsupportedEncodingException e) {
@@ -64,7 +72,7 @@ public class Utilities {
 
     public static ScheduledEvent getEventByIds(String key, long messageId, long channelId) {
         try {
-            String hold = Unirest.get("https://sophiadb-1e63.restdb.io/rest/events?q=" + URLEncoder.encode(
+            JSONArray hold = Unirest.get("https://sophiadb-1e63.restdb.io/rest/events?q=" + URLEncoder.encode(
                         "{\"MessageId\": \"" + messageId + "\", \"ChannelId\": \"" + channelId + "\"}", "UTF-8"
                         )
                     )
@@ -72,9 +80,9 @@ public class Utilities {
                     .header("cache-control", "no-cache")
                     .asJson()
                     .getBody()
-                    .toString();
-            System.out.println(hold);
-            return (hold.equals("[]")) ? null : parseEvent(hold);
+                    .getArray();
+            //I hate this. Find a better way of doing this in future.
+            return new ScheduledEvent((JSONObject) hold.get(0));
         }
         catch (UnsupportedEncodingException e) {
             System.out.println("Encoding error");
@@ -83,7 +91,7 @@ public class Utilities {
     }
 
     public static HashMap<String, Ticket> getAttendeesByEvent(String key, String eventId) {
-        HashMap<String, Ticket> attendees = new HashMap<>();
+        HashMap<String, Ticket> tickets = new HashMap<>();
         try {
             JSONArray hold = Unirest.get("https://sophiadb-1e63.restdb.io/rest/attendees?q="
                     + URLEncoder.encode("{\"EventId\": \"" + eventId + "\"}", "UTF-8"))
@@ -92,11 +100,13 @@ public class Utilities {
                     .asJson()
                     .getBody()
                     .getArray();
-            for(Object obj : hold) {
-                Ticket ticket = parseTicket(obj.toString());
-                attendees.put(ticket.getRestId(), ticket);
-            }
-            return attendees;
+            hold.forEach((entry) -> {
+                if (entry instanceof JSONObject) {
+                    Ticket ticket = new Ticket((JSONObject) entry);
+                    tickets.put(ticket.key(), ticket);
+                }
+            });
+            return tickets;
         }
         catch (UnsupportedEncodingException e) {
             System.out.println("Encoding error");
@@ -106,7 +116,7 @@ public class Utilities {
 
     public static void pushEvent(String key, ScheduledEvent event) {
         String body = "{" +
-            "\"MessageId\":\"" + event.getEventId() + "\"," +
+            "\"MessageId\":\"" + event.getMessageId() + "\"," +
             "\"ChannelId\":\"" + event.getChannelId() + "\"," +
             "\"Name\":\"" + event.getName() + "\"," +
             "\"DateTime\":\"" + event.getTime().toString() + "\"," +
@@ -122,7 +132,7 @@ public class Utilities {
 
     public static void addAttendee(String key, Ticket ticket) {
         String body = "{" +
-            "\"EventId\":\"" + ticket.getRestId() + "\"," +
+            "\"EventId\":\"" + ticket.getEventId() + "\"," +
             "\"UserId\":\"" + ticket.getUserId() + "\"" +
         "}";
         Unirest.post("https://sophiadb-1e63.restdb.io/rest/attendees")
@@ -133,41 +143,28 @@ public class Utilities {
                 .asString();
     }
 
-    private static ScheduledEvent parseEvent(String string) {
-        HashMap<String, String> map = getStringMap(string);
-        return new ScheduledEvent(
-            map.get("_id"),
-            map.get("MessageId"),
-            map.get("ChannelId"),
-            map.get("Name"),
-            ZonedDateTime.parse(map.get("DateTime")),
-            map.get("Author")
-        );
+    public static void removeAttendee(String key, Ticket ticket) {
+        Unirest.delete("https://sophiadb-1e63.restdb.io/rest/attendees/" + ticket.getRestId())
+                .header("content-type", "application/json")
+                .header("x-apikey", key)
+                .header("cache-control", "no-cache")
+                .asString();
     }
 
-    private static Ticket parseTicket(String string) {
-        HashMap<String, String> map = getStringMap(string);
-        return new Ticket(
-                map.get("_id"),
-                map.get("Attendee")
-        );
-    }
-
-    private static HashMap<String, String> getStringMap(String string) {
-        String[] raw = trim(trim(string)).split(",");
-        HashMap<String, String> map = new HashMap<>();
-        for (String entry : raw) {
-            if(entry.contains(":")) {
-                String[] hold = entry.split(":", 2);
-                map.put(trim(hold[0]), trim(hold[1]));
-            }
+    //Month Day XX:XX AM/PM
+    public static ZonedDateTime getDate(String raw) {
+        DateTimeFormatter formatter = new DateTimeFormatterBuilder()
+                .appendPattern("M d h:m a")
+                .parseDefaulting(ChronoField.YEAR, ZonedDateTime.now().getYear())
+                .toFormatter(Locale.US);
+        try {
+            LocalDateTime hold = LocalDateTime.parse(raw.trim().toUpperCase(), formatter);
+            if (hold.isBefore(LocalDateTime.now())) hold = hold.plusYears(1);
+            return ZonedDateTime.from(hold.atZone(ZoneId.systemDefault()));
         }
-        return map;
-    }
-
-    private static String trim(String string) {
-        if(string.length() < 3) return "";
-        return string.substring(1, string.length() - 1);
+        catch (DateTimeException e) {
+            return null;
+        }
     }
 
     public static ZonedDateTime simpleDate(ZonedDateTime time) {

@@ -2,9 +2,7 @@ package com.commands.scheduling;
 
 import com.Bot;
 import com.commands.GenericCommand;
-import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
-import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 import com.settings.Settings;
 import com.utils.Utilities;
 import net.dv8tion.jda.api.entities.Message;
@@ -13,11 +11,8 @@ import net.dv8tion.jda.api.exceptions.PermissionException;
 
 import java.time.DateTimeException;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.NoSuchElementException;
-import java.util.Objects;
 import java.util.StringTokenizer;
-import java.util.function.Consumer;
 
 public class ScheduleCommand extends GenericCommand {
 
@@ -45,20 +40,20 @@ public class ScheduleCommand extends GenericCommand {
             return;
         }
         String author = message.getAuthor().getId();
-        ScheduledEvent scheduledEvent = new ScheduledEvent(eventName, eventTime, author);
+        ZonedDateTime eventDate = Utilities.getDate(eventTime);
+        if(eventDate == null) {
+            event.replyInDm("Incorrect DateTime format, must be in the form [MM DD HH:mm AM/PM]");
+            return;
+        }
+        ScheduledEvent scheduledEvent = new ScheduledEvent(eventName, eventDate, author);
         try { event.getMessage().delete().queue(); }
         catch (PermissionException e) { System.out.println("Permission denied."); }
-        try {
-            //If the server has a specific channel for schedules, send it there, otherwise just reply.
-            sendChannel = (scheduleChannel != null) ? scheduleChannel : event.getTextChannel();
-            sendChannel.sendMessage(scheduledEvent.formattedString()).queue(m -> {
-                scheduledEvent.setEventId(m.getId());
-                scheduledEvent.setChannelId(sendChannel.getId());
-                Utilities.pushEvent(bot.getConfig().getKey(), scheduledEvent);
-            });
-        }
-        catch(DateTimeException d) {
-            event.replyInDm("Invalid Date/Time format.\n[*schedule Name, MM DD HH:mm AM/PM]");
-        }
+        //If the server has a specific channel for schedules, send it there, otherwise just reply.
+        sendChannel = (scheduleChannel != null) ? scheduleChannel : event.getTextChannel();
+        sendChannel.sendMessage(scheduledEvent.formattedString()).queue(m -> {
+            scheduledEvent.setMessageId(m.getId());
+            scheduledEvent.setChannelId(sendChannel.getId());
+            Utilities.pushEvent(bot.getConfig().getKey(), scheduledEvent);
+        });
     }
 }
