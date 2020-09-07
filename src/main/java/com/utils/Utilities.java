@@ -114,6 +114,20 @@ public class Utilities {
         }
     }
 
+    public static void removeAttendeesByEvent(String key, String eventId) {
+        //TODO: This needs to be fixed.
+        try {
+            Unirest.delete("https://sophiadb-1e63.restdb.io/rest/attendees/"
+                    + URLEncoder.encode("*?q={\"EventId\": \"" + eventId + "\"}", "UTF-8"))
+                    .header("x-apikey", key)
+                    .header("cache-control", "no-cache")
+                    .asString();
+        }
+        catch (UnsupportedEncodingException e) {
+            System.out.println("Encoding error");
+        }
+    }
+
     public static void pushEvent(String key, ScheduledEvent event) {
         String body = "{" +
             "\"MessageId\":\"" + event.getMessageId() + "\"," +
@@ -128,6 +142,14 @@ public class Utilities {
             .header("cache-control", "no-cache")
             .body(body)
             .asString();
+    }
+
+    public static void removeEvent(String key, ScheduledEvent event) {
+        Unirest.delete("https://sophiadb-1e63.restdb.io/rest/events/" + event.getRestId())
+                .header("content-type", "application/json")
+                .header("x-apikey", key)
+                .header("cache-control", "no-cache")
+                .asString();
     }
 
     public static void addAttendee(String key, Ticket ticket) {

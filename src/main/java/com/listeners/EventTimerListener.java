@@ -5,8 +5,11 @@ import com.commands.scheduling.ScheduledEvent;
 import com.commands.scheduling.Ticket;
 import com.utils.Utilities;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.requests.RestAction;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalDate;
@@ -20,6 +23,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 public class EventTimerListener extends ListenerAdapter {
 
@@ -40,14 +44,19 @@ public class EventTimerListener extends ListenerAdapter {
             HashMap<String, ScheduledEvent> events = Utilities.getStartingEvents(bot.getConfig().getKey(),now);
             if (events != null)
                 events.forEach((k,e) -> {
+                    TextChannel channel = Objects.requireNonNull(event.getJDA().getTextChannelById(e.getChannelId()));
                     HashMap<String, Ticket> tickets = Utilities.getAttendeesByEvent(bot.getConfig().getKey(), e.getRestId());
-                    StringBuilder attending = new StringBuilder();
-                    Objects.requireNonNull(tickets).forEach((tk, t) -> attending.append(t.getMention()));
-                    attending.append("\n");
-                    Objects.requireNonNull(event.getJDA().getTextChannelById(e.getChannelId()))
-                            .sendMessage(attending.toString() + e.getName() + " is starting!")
-                            .queue();
-                    //TODO: Put the strikethroughs on an event that has begun.
+                    RestAction<Message> fetchMessage = channel.retrieveMessageById(e.getMessageId());
+                    Consumer<Message> callback = (message) -> {
+                        StringBuilder mentions = new StringBuilder();
+                        if (tickets != null)
+                            tickets.forEach((id, ticket) -> mentions.append(ticket.getMention()));
+                        Utilities.removeEvent(bot.getConfig().getKey(), e);
+                        Utilities.removeAttendeesByEvent(bot.getConfig().getKey(), e.getRestId());
+                        channel.editMessageById(e.getMessageId(), "~~" + message.getContentRaw() +"~~").queue();
+                        channel.sendMessage("Event Starting: " + e.getName() + "\n" + mentions.toString()).queue();
+                    };
+                    fetchMessage.queue(callback);
                 });
         };
         scheduler.scheduleAtFixedRate(check, 0, 1, TimeUnit.MINUTES);

@@ -4,18 +4,22 @@ import com.Bot;
 import com.commands.scheduling.ScheduledEvent;
 import com.commands.scheduling.Ticket;
 import com.utils.Utilities;
+import jdk.jshell.execution.Util;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageReaction;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionRemoveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.RestAction;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class EmoteReactionListener extends ListenerAdapter {
 
     private final Bot bot;
+    private final String cancelEmote = "RE:U+1f6ab";
 
     public EmoteReactionListener(Bot bot) {
         this.bot = bot;
@@ -32,11 +36,15 @@ public class EmoteReactionListener extends ListenerAdapter {
                     message.getIdLong(),
                     message.getChannel().getIdLong());
             if(scheduledEvent != null) {
-                //TODO: Add the event cancelling emote.
                 HashMap<String, Ticket> attendees = Utilities.getAttendeesByEvent(
                         bot.getConfig().getKey(),
                         scheduledEvent.getRestId()
                 );
+                if(event.getUserIdLong() == bot.getConfig().getOwner() && event.getReactionEmote().toString().equals(cancelEmote)) {
+                    Utilities.removeEvent(bot.getConfig().getKey(), scheduledEvent);
+                    Utilities.removeAttendeesByEvent(bot.getConfig().getKey(), scheduledEvent.getRestId());
+                    message.editMessage("~~" + message.getContentRaw() + "~~").queue();
+                }
                 Ticket ticket = new Ticket(scheduledEvent.getRestId(), event.getUserId());
                 if(!attendees.containsKey(ticket.key())) {
                     attendees.put(ticket.key(), ticket);
