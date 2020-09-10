@@ -28,6 +28,8 @@ public class Utilities {
     private final static String WINDOWS_INVALID_PATH = "c:\\windows\\system32\\";
     private static String apiKey;
 
+    //Todo: Might have to conceal the URLs.
+
     public static Path getPath(String path) {
         path = "src/main/resources/" + path;
         //Special logic to prevent trying to access system32

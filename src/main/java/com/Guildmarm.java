@@ -1,6 +1,5 @@
 package com;
 
-import com.commands.scheduling.ScheduleCheckCommand;
 import com.commands.scheduling.ScheduleCommand;
 import com.listeners.EmoteReactionListener;
 import com.listeners.EventTimerListener;
@@ -13,7 +12,6 @@ import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 
 import javax.security.auth.login.LoginException;
-import java.io.IOException;
 
 public class Guildmarm {
 
@@ -40,8 +38,7 @@ public class Guildmarm {
             .setActivity(Activity.watching(config.getGame()))
             .setGuildSettingsManager(settings)
             .addCommands(
-                new ScheduleCommand(bot),
-                new ScheduleCheckCommand(bot)
+                new ScheduleCommand(bot)
             );
 
         try {
