@@ -49,10 +49,12 @@ public class EventTimerListener extends ListenerAdapter {
                     RestAction<Message> fetchMessage = channel.retrieveMessageById(e.getMessageId());
                     Consumer<Message> callback = (message) -> {
                         StringBuilder mentions = new StringBuilder();
+                        Utilities.removeEvent(bot.getConfig().getKey(), e);
+                        if (tickets != null) {
+                            tickets.forEach((tk, ticket) -> Utilities.removeAttendee(bot.getConfig().getKey(), ticket));
+                        }
                         if (tickets != null)
                             tickets.forEach((id, ticket) -> mentions.append(ticket.getMention()));
-                        Utilities.removeEvent(bot.getConfig().getKey(), e);
-                        Utilities.removeAttendeesByEvent(bot.getConfig().getKey(), e.getRestId());
                         channel.editMessageById(e.getMessageId(), "~~" + message.getContentRaw() +"~~").queue();
                         channel.sendMessage("Event Starting: " + e.getName() + "\n" + mentions.toString()).queue();
                     };

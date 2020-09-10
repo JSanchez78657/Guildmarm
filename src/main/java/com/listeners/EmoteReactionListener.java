@@ -36,19 +36,21 @@ public class EmoteReactionListener extends ListenerAdapter {
                     message.getIdLong(),
                     message.getChannel().getIdLong());
             if(scheduledEvent != null) {
-                HashMap<String, Ticket> attendees = Utilities.getAttendeesByEvent(
+                HashMap<String, Ticket> tickets = Utilities.getAttendeesByEvent(
                         bot.getConfig().getKey(),
                         scheduledEvent.getRestId()
                 );
                 if(event.getUserIdLong() == bot.getConfig().getOwner() && event.getReactionEmote().toString().equals(cancelEmote)) {
                     Utilities.removeEvent(bot.getConfig().getKey(), scheduledEvent);
-                    Utilities.removeAttendeesByEvent(bot.getConfig().getKey(), scheduledEvent.getRestId());
+                    if (tickets != null) {
+                        tickets.forEach((tk, ticket) -> Utilities.removeAttendee(bot.getConfig().getKey(), ticket));
+                    }
                     message.editMessage("~~" + message.getContentRaw() + "~~").queue();
                 }
                 Ticket ticket = new Ticket(scheduledEvent.getRestId(), event.getUserId());
-                if(!attendees.containsKey(ticket.key())) {
-                    attendees.put(ticket.key(), ticket);
-                    scheduledEvent.setAttending(attendees);
+                if (tickets != null && !tickets.containsKey(ticket.key())) {
+                    tickets.put(ticket.key(), ticket);
+                    scheduledEvent.setAttending(tickets);
                     Utilities.addAttendee(bot.getConfig().getKey(), ticket);
                     message.editMessage(scheduledEvent.formattedString()).queue();
                 }
@@ -76,7 +78,7 @@ public class EmoteReactionListener extends ListenerAdapter {
                         scheduledEvent.getRestId()
                 );
                 Ticket ticket = new Ticket(scheduledEvent.getRestId(), event.getUserId());
-                if(attendees.containsKey(ticket.key())) {
+                if (attendees != null && attendees.containsKey(ticket.key())) {
                     ticket = attendees.remove(ticket.key());
                     scheduledEvent.setAttending(attendees);
                     Utilities.removeAttendee(bot.getConfig().getKey(), ticket);
