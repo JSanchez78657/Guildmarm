@@ -6,7 +6,6 @@ import com.commands.scheduling.Ticket;
 import kong.unirest.*;
 import kong.unirest.json.JSONArray;
 import kong.unirest.json.JSONObject;
-
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
@@ -26,9 +25,6 @@ import java.util.Locale;
 public class Utilities {
 
     private final static String WINDOWS_INVALID_PATH = "c:\\windows\\system32\\";
-    private static String apiKey;
-
-    //Todo: Might have to conceal the URLs.
 
     public static Path getPath(String path) {
         path = "src/main/resources/" + path;

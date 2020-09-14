@@ -3,11 +3,7 @@ package com.settings;
 import com.jagrosh.jdautilities.command.GuildSettingsManager;
 import com.utils.Utilities;
 import net.dv8tion.jda.api.entities.Guild;
-import org.json.JSONException;
 import org.json.JSONObject;
-
-import javax.annotation.Nullable;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.HashMap;

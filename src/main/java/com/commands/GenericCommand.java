@@ -4,8 +4,6 @@ import com.Bot;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.settings.Settings;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.exceptions.PermissionException;
 
 public abstract class GenericCommand extends Command {
 

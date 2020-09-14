@@ -8,8 +8,6 @@ import com.utils.Utilities;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.exceptions.PermissionException;
-
-import java.time.DateTimeException;
 import java.time.ZonedDateTime;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
@@ -24,7 +22,7 @@ public class ScheduleCommand extends GenericCommand {
         this.help =
                 "Schedules a given event for a given time. " +
                 "Events can be joined by reacting to the event's post in Discord." +
-                "Events are cancelled by reacting with `no_entry_sign`. Only the event creator may do this." +
+                "Events are cancelled by reacting with `:no_entry_sign:`. Only the event creator may do this." +
                 "At the time of the event, Guildmarm will notify all attendees of the event.";
     }
 

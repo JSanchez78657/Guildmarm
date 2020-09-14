@@ -4,16 +4,12 @@ import com.Bot;
 import com.commands.scheduling.ScheduledEvent;
 import com.commands.scheduling.Ticket;
 import com.utils.Utilities;
-import jdk.jshell.execution.Util;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageReaction;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionRemoveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.RestAction;
-
 import java.util.HashMap;
-import java.util.List;
 import java.util.function.Consumer;
 
 public class EmoteReactionListener extends ListenerAdapter {
