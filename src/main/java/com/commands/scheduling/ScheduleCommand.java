@@ -18,9 +18,14 @@ public class ScheduleCommand extends GenericCommand {
 
     public ScheduleCommand(Bot bot) {
         super(bot);
+        this.category = new Category("Scheduling");
         this.name = "schedule";
         this.arguments = "<event_name>, <date_time>";
-        this.help = "schedules given event.";
+        this.help =
+                "Schedules a given event for a given time. " +
+                "Events can be joined by reacting to the event's post in Discord." +
+                "Events are cancelled by reacting with `no_entry_sign`. Only the event creator may do this." +
+                "At the time of the event, Guildmarm will notify all attendees of the event.";
     }
 
     @Override

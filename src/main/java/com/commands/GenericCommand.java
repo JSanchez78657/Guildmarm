@@ -13,7 +13,7 @@ public abstract class GenericCommand extends Command {
 
     public GenericCommand(Bot bot) {
         this.bot = bot;
-        this.category = new Category("general");
+        this.category = new Category("General");
     }
 
     @Override

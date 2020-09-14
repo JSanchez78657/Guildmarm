@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'DiscordBot'
-version '.2'
+version '1.0.1'
 
 jar {
     manifest {
