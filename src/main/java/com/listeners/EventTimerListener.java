@@ -47,7 +47,7 @@ public class EventTimerListener extends ListenerAdapter {
                             tickets.forEach((tk, ticket) -> Utilities.removeAttendee(bot.getConfig().getKey(), ticket));
                         }
                         if (tickets != null)
-                            tickets.forEach((id, ticket) -> mentions.append(ticket.getMention()));
+                            tickets.forEach((id, ticket) -> mentions.append(ticket.getMention()).append(" "));
                         channel.editMessageById(e.getMessageId(), "~~" + message.getContentRaw() +"~~").queue();
                         channel.sendMessage("Event Starting: " + e.getName() + "\n" + mentions.toString()).queue();
                     };
