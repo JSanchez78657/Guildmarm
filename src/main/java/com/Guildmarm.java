@@ -1,5 +1,6 @@
 package com;
 
+import com.commands.admin.ShutdownCommand;
 import com.commands.scheduling.ScheduleCommand;
 import com.listeners.EmoteReactionListener;
 import com.listeners.EventTimerListener;
@@ -38,7 +39,8 @@ public class Guildmarm {
             .setActivity(Activity.watching(config.getGame()))
             .setGuildSettingsManager(settings)
             .addCommands(
-                new ScheduleCommand(bot)
+                new ScheduleCommand(bot),
+                    new ShutdownCommand(bot)
             );
 
         try {

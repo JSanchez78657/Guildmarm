@@ -43,6 +43,24 @@ public class Utilities {
         return Paths.get(path);
     }
 
+    public static HashMap<String, ScheduledEvent> getAllEvents(String key) {
+        HashMap<String, ScheduledEvent> events = new HashMap<>();
+        JSONArray hold = Unirest
+                .get("https://sophiadb-1e63.restdb.io/rest/events")
+                .header("x-apikey", key)
+                .header("cache-control", "no-cache")
+                .asJson()
+                .getBody()
+                .getArray();
+        hold.forEach((entry) -> {
+            if (entry instanceof JSONObject) {
+                ScheduledEvent event = new ScheduledEvent((JSONObject) entry);
+                events.put(event.getRestId(), event);
+            }
+        });
+        return events;
+    }
+
     public static HashMap<String, ScheduledEvent> getStartingEvents(String key, ZonedDateTime time) {
         HashMap<String, ScheduledEvent> events = new HashMap<>();
         time = Utilities.simpleDate(time);
@@ -112,7 +130,7 @@ public class Utilities {
         }
     }
 
-    public static void pushEvent(String key, ScheduledEvent event) {
+    public static JSONObject pushEvent(String key, ScheduledEvent event) {
         String body = "{" +
             "\"MessageId\":\"" + event.getMessageId() + "\"," +
             "\"ChannelId\":\"" + event.getChannelId() + "\"," +
@@ -120,12 +138,14 @@ public class Utilities {
             "\"DateTime\":\"" + event.getTime().toString() + "\"," +
             "\"Author\":\"" + event.getAuthor() + "\"" +
         "}";
-        Unirest.post("https://sophiadb-1e63.restdb.io/rest/events")
+        JsonNode hold = Unirest.post("https://sophiadb-1e63.restdb.io/rest/events")
             .header("content-type", "application/json")
             .header("x-apikey", key)
             .header("cache-control", "no-cache")
             .body(body)
-            .asString();
+            .asJson()
+            .getBody();
+        return hold.getObject();
     }
 
     public static void removeEvent(String key, ScheduledEvent event) {

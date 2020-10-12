@@ -5,6 +5,8 @@ import com.commands.GenericCommand;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.settings.Settings;
 import com.utils.Utilities;
+import kong.unirest.JsonNode;
+import kong.unirest.json.JSONObject;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.exceptions.PermissionException;
@@ -56,7 +58,7 @@ public class ScheduleCommand extends GenericCommand {
         sendChannel.sendMessage(scheduledEvent.formattedString()).queue(m -> {
             scheduledEvent.setMessageId(m.getId());
             scheduledEvent.setChannelId(sendChannel.getId());
-            Utilities.pushEvent(bot.getConfig().getKey(), scheduledEvent);
+            bot.addEvent(new ScheduledEvent(Utilities.pushEvent(bot.getConfig().getKey(), scheduledEvent)));
         });
     }
 }

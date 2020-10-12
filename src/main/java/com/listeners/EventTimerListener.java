@@ -33,9 +33,14 @@ public class EventTimerListener extends ListenerAdapter {
         //"check" contains what is run every minute by the scheduler.
         //In this case, it is checking to see if any events are scheduled at the given time.
         final Runnable check = () -> {
-            ZonedDateTime now = ZonedDateTime.now();
-            HashMap<String, ScheduledEvent> events = Utilities.getStartingEvents(bot.getConfig().getKey(),now);
-            if (events != null)
+            final ZonedDateTime now = ZonedDateTime.now();
+            HashMap<String, ScheduledEvent> events = new HashMap<>();
+            bot.getEvents().forEach((s, scheduledEvent) -> {
+                    if(scheduledEvent.getTime().isBefore(now))
+                        events.put(s, scheduledEvent);
+                }
+            );
+            if (!events.isEmpty())
                 events.forEach((k,e) -> {
                     TextChannel channel = Objects.requireNonNull(event.getJDA().getTextChannelById(e.getChannelId()));
                     HashMap<String, Ticket> tickets = Utilities.getAttendeesByEvent(bot.getConfig().getKey(), e.getRestId());
@@ -43,6 +48,7 @@ public class EventTimerListener extends ListenerAdapter {
                     Consumer<Message> callback = (message) -> {
                         StringBuilder mentions = new StringBuilder();
                         Utilities.removeEvent(bot.getConfig().getKey(), e);
+                        bot.removeEvent(e);
                         if (tickets != null) {
                             tickets.forEach((tk, ticket) -> Utilities.removeAttendee(bot.getConfig().getKey(), ticket));
                         }
@@ -54,6 +60,10 @@ public class EventTimerListener extends ListenerAdapter {
                     fetchMessage.queue(callback);
                 });
         };
+        final Runnable update = () -> {
+            bot.setEvents(Utilities.getAllEvents(bot.getConfig().getKey()));
+        };
         scheduler.scheduleAtFixedRate(check, 0, 1, TimeUnit.MINUTES);
+        scheduler.scheduleAtFixedRate(update, 45, 45, TimeUnit.MINUTES);
     }
 }

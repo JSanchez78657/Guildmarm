@@ -36,12 +36,15 @@ public class EmoteReactionListener extends ListenerAdapter {
                         bot.getConfig().getKey(),
                         scheduledEvent.getRestId()
                 );
+                //If the reaction is a cancel emote, cancel the event.
                 if(event.getUserIdLong() == bot.getConfig().getOwner() && event.getReactionEmote().toString().equals(cancelEmote)) {
                     Utilities.removeEvent(bot.getConfig().getKey(), scheduledEvent);
+                    bot.removeEvent(scheduledEvent);
                     if (tickets != null) {
                         tickets.forEach((tk, ticket) -> Utilities.removeAttendee(bot.getConfig().getKey(), ticket));
                     }
                     message.editMessage("~~" + message.getContentRaw() + "~~").queue();
+                    return;
                 }
                 Ticket ticket = new Ticket(scheduledEvent.getRestId(), event.getUserId());
                 if (tickets != null && !tickets.containsKey(ticket.key())) {
