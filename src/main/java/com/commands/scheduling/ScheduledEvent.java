@@ -2,6 +2,7 @@ package com.commands.scheduling;
 
 import kong.unirest.json.JSONObject;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -95,12 +96,17 @@ public class ScheduledEvent {
     }
 
     public String formattedString() {
-        String period = getPeriod(time.getHour());
         StringBuilder stringBuilder = new StringBuilder();
-        int hour = (time.getHour() > 12) ? time.getHour() - 12 : time.getHour();
+        ZonedDateTime timeEST = time.plus(3, ChronoUnit.HOURS);
+        int hourPST = (time.getHour() > 12) ? time.getHour() - 12 : time.getHour();
+        int hourEST = (timeEST.getHour() > 12) ? timeEST.getHour() - 12 : timeEST.getHour();
+        String periodPST = getPeriod(time.getHour());
+        String periodEST = getPeriod(timeEST.getHour());
+        String pstString = ((hourPST == 0) ? 12 : hourPST) + ":" + convertMin(time.getMinute()) + " " + periodPST + " PST";
+        String estString = ((hourEST == 0) ? 12 : hourEST) + ":" + convertMin(timeEST.getMinute()) + " " + periodEST + " EST";
         String hold =
             nameHeader + name + "\n" +
-            timeHeader + ((hour == 0) ? 12 : hour) + ":" + convertMin(time.getMinute()) + " " + period + " PST\n" +
+            timeHeader + pstString + " (" + estString + ")\n" +
             dateHeader + toTitleCase(time.getDayOfWeek().toString()) + ", " + toTitleCase(time.getMonth().toString()) + " " + time.getDayOfMonth() + ", " + time.getYear() + "\n";
         stringBuilder.append(hold);
         if(!attending.isEmpty()) {
