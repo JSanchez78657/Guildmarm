@@ -7,12 +7,14 @@ import com.listeners.EventTimerListener;
 import com.jagrosh.jdautilities.command.CommandClientBuilder;
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 import com.settings.SettingsManager;
+import com.utils.Utilities;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 
 import javax.security.auth.login.LoginException;
+import java.util.logging.Level;
 
 public class Guildmarm {
 
@@ -25,7 +27,7 @@ public class Guildmarm {
         BotConfig config = new BotConfig();
         config.load();
         if(!config.isValid()) {
-            System.out.println("Invalid configuration");
+            Utilities.log(Level.CONFIG, "No valid configuration file found.");
             return;
         }
         Bot bot = new Bot(waiter, config, settings);
@@ -56,12 +58,7 @@ public class Guildmarm {
         }
         catch (LoginException ex)
         {
-            System.out.println("LoginException");
-            System.exit(1);
-        }
-        catch (IllegalArgumentException ex)
-        {
-            System.out.println("IllegalArgs");
+            Utilities.log(Level.SEVERE, "Unable to login, login exception");
             System.exit(1);
         }
     }

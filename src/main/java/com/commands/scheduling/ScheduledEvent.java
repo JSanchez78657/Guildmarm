@@ -91,8 +91,7 @@ public class ScheduledEvent {
 
     @Override
     public String toString() {
-        return  name + ", at " + time.getHour() + ":" + convertMin(time.getMinute()) + " on " +
-                toTitleCase(time.getDayOfWeek().toString()) + ", " + toTitleCase(time.getMonth().toString()) + " " + time.getDayOfMonth() + ".";
+        return  "(" + name + ", " + messageId + ", " + channelId + ")";
     }
 
     public String formattedString() {

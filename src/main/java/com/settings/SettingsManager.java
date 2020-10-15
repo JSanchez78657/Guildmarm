@@ -7,6 +7,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.HashMap;
+import java.util.logging.Level;
 
 public class SettingsManager implements GuildSettingsManager {
 
@@ -57,7 +58,7 @@ public class SettingsManager implements GuildSettingsManager {
         try {
             Files.write(Utilities.getPath("serversettings.json"), obj.toString(4).getBytes());
         } catch(IOException ex){
-            System.out.println("Error in file writing.");
+            Utilities.log(Level.SEVERE, "Unable to write to server settings file.");
         }
     }
 }

@@ -6,6 +6,7 @@ import com.typesafe.config.ConfigFactory;
 import com.utils.Utilities;
 
 import java.nio.file.Path;
+import java.util.logging.Level;
 
 public class BotConfig {
     private Path path = null;
@@ -40,19 +41,21 @@ public class BotConfig {
             //Check for valid bot token.
             if(token == null || token.isEmpty()) {
                 System.out.println("Please provide a valid bot token in " + path.toAbsolutePath().toString() + ".");
+                Utilities.log(Level.SEVERE, "No valid bot token found.");
                 return;
             }
 
             // Validate owner ID.
             if(owner <= 0) {
                 System.out.println("Please provide a valid owner ID in " + path.toAbsolutePath().toString() + ".");
+                Utilities.log(Level.SEVERE, "No owner ID found.");
                 return;
             }
 
             valid = true;
         }
         catch(ConfigException e) {
-            System.out.println("Config Exception");
+            Utilities.log(Level.SEVERE, "Config file failed to load correctly.");
         }
     }
 

@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.RestAction;
 import java.util.HashMap;
 import java.util.function.Consumer;
+import java.util.logging.Level;
 
 public class EmoteReactionListener extends ListenerAdapter {
 
@@ -27,10 +28,7 @@ public class EmoteReactionListener extends ListenerAdapter {
         Consumer<Message> callback = (message) -> {
             //If the message wasn't made by the bot, return. If the message doesn't begin with "Event", return.
             if(message.getAuthor() != bot.getJda().getSelfUser() || !message.getContentRaw().startsWith("Event")) return;
-            ScheduledEvent scheduledEvent = Utilities.getEventByIds(
-                    bot.getConfig().getKey(),
-                    message.getIdLong(),
-                    message.getChannel().getIdLong());
+            ScheduledEvent scheduledEvent = getEvent(message);
             if(scheduledEvent != null) {
                 HashMap<String, Ticket> tickets = Utilities.getAttendeesByEvent(
                         bot.getConfig().getKey(),
@@ -38,24 +36,35 @@ public class EmoteReactionListener extends ListenerAdapter {
                 );
                 //If the reaction is a cancel emote, cancel the event.
                 if(event.getUserIdLong() == bot.getConfig().getOwner() && event.getReactionEmote().toString().equals(cancelEmote)) {
-                    Utilities.removeEvent(bot.getConfig().getKey(), scheduledEvent);
                     bot.removeEvent(scheduledEvent);
                     if (tickets != null) {
                         tickets.forEach((tk, ticket) -> Utilities.removeAttendee(bot.getConfig().getKey(), ticket));
                     }
                     message.editMessage("~~" + message.getContentRaw() + "~~").queue();
+                    Utilities.removeEvent(bot.getConfig().getKey(), scheduledEvent);
+                    Utilities.log(Level.INFO,
+                            "(" + ((event.getUser() != null) ? event.getUser().getName() : "") + ", " + event.getUserId() + ") cancelled " +
+                                    scheduledEvent.toString() + "."
+                    );
                     return;
                 }
                 Ticket ticket = new Ticket(scheduledEvent.getRestId(), event.getUserId());
                 if (tickets != null && !tickets.containsKey(ticket.key())) {
                     tickets.put(ticket.key(), ticket);
                     scheduledEvent.setAttending(tickets);
-                    Utilities.addAttendee(bot.getConfig().getKey(), ticket);
                     message.editMessage(scheduledEvent.formattedString()).queue();
+                    Utilities.addAttendee(bot.getConfig().getKey(), ticket);
                 }
+                Utilities.log(Level.INFO,
+                "(" + ((event.getUser() != null) ? event.getUser().getName() : "") + ", " + event.getUserId() + ") joined " +
+                        scheduledEvent.toString() + "."
+                );
             }
             else {
-                System.out.println("Not a valid event.");
+                Utilities.log(Level.WARNING,
+                "(" + ((event.getUser() != null) ? event.getUser().getName() : "") + ", " + event.getUserId() + ") added reaction to " +
+                        "(" + event.getMessageId() + ", " + event.getChannel().getId() + ") this is not a valid event."
+                );
             }
         };
         msgRest.queue(callback);
@@ -67,10 +76,7 @@ public class EmoteReactionListener extends ListenerAdapter {
         Consumer<Message> callback = (message) -> {
             //If the message wasn't made by the bot, return. If the message doesn't begin with "Event", return.
             if(message.getAuthor() != bot.getJda().getSelfUser() || !message.getContentRaw().startsWith("Event")) return;
-            ScheduledEvent scheduledEvent = Utilities.getEventByIds(
-                    bot.getConfig().getKey(),
-                    message.getIdLong(),
-                    message.getChannel().getIdLong());
+            ScheduledEvent scheduledEvent = getEvent(message);
             if(scheduledEvent != null) {
                 HashMap<String, Ticket> attendees = Utilities.getAttendeesByEvent(
                         bot.getConfig().getKey(),
@@ -80,14 +86,34 @@ public class EmoteReactionListener extends ListenerAdapter {
                 if (attendees != null && attendees.containsKey(ticket.key())) {
                     ticket = attendees.remove(ticket.key());
                     scheduledEvent.setAttending(attendees);
-                    Utilities.removeAttendee(bot.getConfig().getKey(), ticket);
                     message.editMessage(scheduledEvent.formattedString()).queue();
+                    Utilities.removeAttendee(bot.getConfig().getKey(), ticket);
                 }
+                Utilities.log(Level.INFO,
+                "(" + ((event.getUser() != null) ? event.getUser().getName() : "") + ", " + event.getUserId() + ") left " +
+                        scheduledEvent.toString() + "."
+                );
             }
             else {
-                System.out.println("Not a valid event.");
+                Utilities.log(Level.WARNING,
+                "(" + ((event.getUser() != null) ? event.getUser().getName() : "") + ", " + event.getUserId() + ") removed reaction to " +
+                        "(" + event.getMessageId() + ", " + event.getChannel().getId() + ") this is not a valid event."
+                );
             }
         };
         msgRest.queue(callback);
+    }
+
+    private ScheduledEvent getEvent(Message message) {
+        for(String key : bot.getEvents().keySet()) {
+            ScheduledEvent hold = bot.getEvents().get(key);
+            if(hold.getMessageId().equals(message.getId()) && hold.getChannelId().equals(message.getChannel().getId()))
+                return hold;
+        }
+        return Utilities.getEventByIds(
+                bot.getConfig().getKey(),
+                message.getIdLong(),
+                message.getChannel().getIdLong()
+        );
     }
 }

@@ -21,10 +21,13 @@ import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Utilities {
 
     private final static String WINDOWS_INVALID_PATH = "c:\\windows\\system32\\";
+    private static final Logger logger = Logger.getLogger(Utilities.class.getName());
 
     public static Path getPath(String path) {
         path = "src/main/resources/" + path;
@@ -37,7 +40,7 @@ public class Utilities {
                 path = new File(Bot.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile().getPath() + File.separator + filename;
             }
             catch(URISyntaxException ex) {
-                System.out.println("URISyntax Error!");
+                log(Level.SEVERE, "Filepath was unable to be parsed correctly.");
             }
         }
         return Paths.get(path);
@@ -81,7 +84,7 @@ public class Utilities {
             return events;
         }
         catch (UnsupportedEncodingException e) {
-            System.out.println("Encoding error");
+            log(Level.WARNING, "Query was unable to be encoded.");
             return null;
         }
     }
@@ -101,7 +104,7 @@ public class Utilities {
             return new ScheduledEvent((JSONObject) hold.get(0));
         }
         catch (UnsupportedEncodingException e) {
-            System.out.println("Encoding error");
+            log(Level.WARNING, "Query was unable to be encoded.");
             return null;
         }
     }
@@ -125,7 +128,7 @@ public class Utilities {
             return tickets;
         }
         catch (UnsupportedEncodingException e) {
-            System.out.println("Encoding error");
+            log(Level.WARNING, "Query was unable to be encoded.");
             return null;
         }
     }
@@ -204,5 +207,9 @@ public class Utilities {
             0,
             time.getZone()
         );
+    }
+
+    public static void log(Level level, String message) {
+        logger.log(level, message);
     }
 }

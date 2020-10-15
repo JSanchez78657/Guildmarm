@@ -17,6 +17,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.logging.Level;
 
 public class EventTimerListener extends ListenerAdapter {
 
@@ -29,10 +30,10 @@ public class EventTimerListener extends ListenerAdapter {
 
     @Override
     public void onReady(@NotNull ReadyEvent event) {
-        System.out.println("Starting Timer");
         //"check" contains what is run every minute by the scheduler.
         //In this case, it is checking to see if any events are scheduled at the given time.
         final Runnable check = () -> {
+            Utilities.log(Level.INFO, "Checking for starting events.");
             final ZonedDateTime now = ZonedDateTime.now();
             HashMap<String, ScheduledEvent> events = new HashMap<>();
             bot.getEvents().forEach((s, scheduledEvent) -> {
@@ -42,6 +43,7 @@ public class EventTimerListener extends ListenerAdapter {
             );
             if (!events.isEmpty())
                 events.forEach((k,e) -> {
+                    Utilities.log(Level.INFO, "Starting event: " + e.toString());
                     TextChannel channel = Objects.requireNonNull(event.getJDA().getTextChannelById(e.getChannelId()));
                     HashMap<String, Ticket> tickets = Utilities.getAttendeesByEvent(bot.getConfig().getKey(), e.getRestId());
                     RestAction<Message> fetchMessage = channel.retrieveMessageById(e.getMessageId());
@@ -61,6 +63,7 @@ public class EventTimerListener extends ListenerAdapter {
                 });
         };
         final Runnable update = () -> {
+            Utilities.log(Level.INFO, "Refreshing stored events.");
             bot.setEvents(Utilities.getAllEvents(bot.getConfig().getKey()));
         };
         scheduler.scheduleAtFixedRate(check, 0, 1, TimeUnit.MINUTES);

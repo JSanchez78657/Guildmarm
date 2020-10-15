@@ -4,7 +4,10 @@ import com.Bot;
 import com.commands.GenericCommand;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.settings.Settings;
+import com.utils.Utilities;
 import net.dv8tion.jda.api.entities.TextChannel;
+
+import java.util.logging.Level;
 
 public class ShutdownCommand extends GenericCommand {
 
@@ -18,12 +21,13 @@ public class ShutdownCommand extends GenericCommand {
 
     @Override
     public void execCmd(CommandEvent event) {
+        event.getMessage().delete().queue();
         if(bot.getConfig().getOwner() != event.getAuthor().getIdLong()) {
-            event.getMessage().delete().queue();
             event.replyInDm("Hey, you stop that.");
+            Utilities.log(Level.WARNING, event.getAuthor().getName() + " (" + event.getAuthor().getId() + ") attempted shutdown command.");
         }
         else {
-            event.getMessage().delete().queue();
+            Utilities.log(Level.INFO, event.getAuthor().getName() + " (" + event.getAuthor().getId() + ") initiated shutdown.");
             try {
                 Thread.sleep(2000);
                 bot.getJda().shutdown();
