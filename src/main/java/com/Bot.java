@@ -43,9 +43,9 @@ public class Bot {
         this.jda = jda;
     }
 
-    public void addEvent(ScheduledEvent event) { events.put(event.getMessageId(), event); }
+    public void addEvent(ScheduledEvent event) { events.put(event.getRestId(), event); }
 
-    public void removeEvent(ScheduledEvent event) { events.remove(event.getMessageId()); }
+    public void removeEvent(ScheduledEvent event) { events.remove(event.getRestId()); }
 
     public HashMap<String, ScheduledEvent> getEvents() { return events; }
 

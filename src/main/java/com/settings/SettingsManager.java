@@ -27,7 +27,7 @@ public class SettingsManager implements GuildSettingsManager {
             });
         }
         catch (IOException e) {
-            System.out.println("No server settings found.");
+            Utilities.log(Level.WARNING, "Unable to find server settings.");
         }
     }
 

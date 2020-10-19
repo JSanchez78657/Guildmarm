@@ -68,10 +68,10 @@ public class ScheduleCommand extends GenericCommand {
             scheduledEvent.setMessageId(m.getId());
             scheduledEvent.setChannelId(sendChannel.getId());
             bot.addEvent(new ScheduledEvent(Utilities.pushEvent(bot.getConfig().getKey(), scheduledEvent)));
+            Utilities.log(Level.INFO,
+                    "(" + event.getAuthor().getName() + ", " + event.getAuthor().getId() + ") started " +
+                            scheduledEvent.toString() + "."
+            );
         });
-        Utilities.log(Level.INFO,
-        "(" + event.getAuthor().getName() + ", " + event.getAuthor().getId() + ") started " +
-                scheduledEvent.toString() + "."
-        );
     }
 }
