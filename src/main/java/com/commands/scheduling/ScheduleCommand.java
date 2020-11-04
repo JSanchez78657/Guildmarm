@@ -21,7 +21,7 @@ public class ScheduleCommand extends GenericCommand {
         super(bot);
         this.category = new Category("Scheduling");
         this.name = "schedule";
-        this.arguments = "<event_name>, <date_time>";
+        this.arguments = "[Event Name], [MM DD HH:mm AM/PM]";
         this.help =
                 "Schedules a given event for a given time. " +
                 "Events can be joined by reacting to the event's post in Discord." +

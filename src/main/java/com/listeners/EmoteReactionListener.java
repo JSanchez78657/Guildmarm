@@ -35,7 +35,7 @@ public class EmoteReactionListener extends ListenerAdapter {
                         scheduledEvent.getRestId()
                 );
                 //If the reaction is a cancel emote, cancel the event.
-                if(event.getUserIdLong() == bot.getConfig().getOwner() && event.getReactionEmote().toString().equals(cancelEmote)) {
+                if(event.getUserId().equals(scheduledEvent.getAuthor()) && event.getReactionEmote().toString().equals(cancelEmote)) {
                     bot.removeEvent(scheduledEvent);
                     if (tickets != null) {
                         tickets.forEach((tk, ticket) -> Utilities.removeAttendee(bot.getConfig().getKey(), ticket));
