@@ -9,24 +9,31 @@ import java.util.List;
 
 public class ScheduledEvent {
 
-    private static String nameHeader = "Event: ";
-    private static String timeHeader = "Time: ";
-    private static String dateHeader = "Date: ";
-    private static String attendingHeader = "Attending:";
+    private static final String nameHeader = "Event: ";
+    private static final String timeHeader = "Time: ";
+    private static final String dateHeader = "Date: ";
+    private static final String attendingHeader = "Attending: ";
+    private static final String absentHeader = "Not Attending: ";
 
-    private ZonedDateTime time;
-    private String name;
-    private String author;
+    private final ZonedDateTime time;
+    private final String name;
+    private final String author;
     private String messageId;
     private String channelId;
     private String restId;
     private HashMap<String, Ticket> attending = new HashMap<>();
+    private HashMap<String, Ticket> absent = new HashMap<>();
 
     public ScheduledEvent(String name, ZonedDateTime dateTime, String author, Ticket... attendees) {
         this.name = name;
         this.time = dateTime;
         this.author = author;
-        for(Ticket ticket : attendees) { this.attending.put(ticket.getEventId(), ticket); }
+        for(Ticket ticket : attendees) {
+            if(ticket.isAttending())
+                this.attending.put(ticket.key(), ticket);
+            else
+                this.absent.put(ticket.key(), ticket);
+        }
     }
 
     public ScheduledEvent(String restId, String messageId, String channelId, String name, ZonedDateTime time, String author) {
@@ -79,16 +86,6 @@ public class ScheduledEvent {
         }
     }
 
-    public boolean hasUser(Ticket ticket) { return attending.containsKey(ticket.getEventId()); }
-
-    public void addUser(Ticket attendee) {
-        attending.put(attendee.getEventId(), attendee);
-    }
-
-    public void removeUser(Ticket attendee) {
-        attending.remove(attendee.getEventId());
-    }
-
     @Override
     public String toString() {
         return  "(" + name + ", " + messageId + ", " + channelId + ")";
@@ -106,14 +103,17 @@ public class ScheduledEvent {
         String hold =
             nameHeader + name + "\n" +
             timeHeader + pstString + " (" + estString + ")\n" +
-            dateHeader + toTitleCase(time.getDayOfWeek().toString()) + ", " + toTitleCase(time.getMonth().toString()) + " " + time.getDayOfMonth() + ", " + time.getYear() + "\n";
+            dateHeader + toTitleCase(time.getDayOfWeek().toString()) + ", " + toTitleCase(time.getMonth().toString()) + " " + time.getDayOfMonth() + ", " + time.getYear();
         stringBuilder.append(hold);
         if(!attending.isEmpty()) {
-            List<Ticket> list = new ArrayList<>(attending.values());
-            stringBuilder.append(attendingHeader);
-            for(Ticket ticket : list) stringBuilder.append(" ").append(ticket.getMention());
+            stringBuilder.append("\n"+ attendingHeader);
+            attending.forEach((id, ticket) -> stringBuilder.append(" ").append(ticket.getMention()));
         }
-        stringBuilder.append("\nReact to join.");
+        if(!absent.isEmpty()) {
+            stringBuilder.append("\n" + absentHeader);
+            absent.forEach((id, ticket) -> stringBuilder.append(" ").append(ticket.getMention()));
+        }
+        stringBuilder.append("\nReact to join. React with :no_entry_sign: if you are unable to attend.");
         return stringBuilder.toString();
     }
 
@@ -147,4 +147,20 @@ public class ScheduledEvent {
     public void setChannelId(String channelId) { this.channelId = channelId; }
 
     public void setAttending(HashMap<String, Ticket> attending) { this.attending =  attending; }
+
+    public void addTicket(Ticket ticket) {
+        if (ticket.isAttending()) {
+            absent.remove(ticket.key());
+            attending.put(ticket.key(), ticket);
+        }
+        else {
+            attending.remove(ticket.key());
+            absent.put(ticket.key(), ticket);
+        }
+    }
+
+    public void removeTicket(Ticket ticket) {
+        absent.remove(ticket.key());
+        attending.remove(ticket.key());
+    }
 }

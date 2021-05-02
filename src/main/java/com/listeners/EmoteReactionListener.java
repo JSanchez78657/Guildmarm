@@ -34,7 +34,7 @@ public class EmoteReactionListener extends ListenerAdapter {
                         bot.getConfig().getKey(),
                         scheduledEvent.getRestId()
                 );
-                //If the reaction is a cancel emote, cancel the event.
+                //If the author reacts with a cancel emote, cancel the event
                 if(event.getUserId().equals(scheduledEvent.getAuthor()) && event.getReactionEmote().toString().equals(cancelEmote)) {
                     bot.removeEvent(scheduledEvent);
                     if (tickets != null) {
@@ -48,10 +48,9 @@ public class EmoteReactionListener extends ListenerAdapter {
                     );
                     return;
                 }
-                Ticket ticket = new Ticket(scheduledEvent.getRestId(), event.getUserId());
+                Ticket ticket = new Ticket(scheduledEvent.getRestId(), event.getUserId(), !event.getReactionEmote().toString().equals(cancelEmote));
                 if (tickets != null && !tickets.containsKey(ticket.key())) {
-                    tickets.put(ticket.key(), ticket);
-                    scheduledEvent.setAttending(tickets);
+                    scheduledEvent.addTicket(ticket);
                     message.editMessage(scheduledEvent.formattedString()).queue();
                     Utilities.addAttendee(bot.getConfig().getKey(), ticket);
                 }
@@ -82,12 +81,11 @@ public class EmoteReactionListener extends ListenerAdapter {
                         bot.getConfig().getKey(),
                         scheduledEvent.getRestId()
                 );
-                Ticket ticket = new Ticket(scheduledEvent.getRestId(), event.getUserId());
+                Ticket ticket = new Ticket(scheduledEvent.getRestId(), event.getUserId(), !event.getReactionEmote().toString().equals(cancelEmote));
                 if (attendees != null && attendees.containsKey(ticket.key())) {
-                    ticket = attendees.remove(ticket.key());
-                    scheduledEvent.setAttending(attendees);
+                    scheduledEvent.removeTicket(ticket);
                     message.editMessage(scheduledEvent.formattedString()).queue();
-                    Utilities.removeAttendee(bot.getConfig().getKey(), ticket);
+                    Utilities.removeAttendee(bot.getConfig().getKey(), attendees.get(ticket.key()));
                 }
                 Utilities.log(Level.INFO,
                 "(" + ((event.getUser() != null) ? event.getUser().getName() : "") + ", " + event.getUserId() + ") left " +

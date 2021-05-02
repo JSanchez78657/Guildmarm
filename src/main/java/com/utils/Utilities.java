@@ -162,7 +162,8 @@ public class Utilities {
     public static void addAttendee(String key, Ticket ticket) {
         String body = "{" +
             "\"EventId\":\"" + ticket.getEventId() + "\"," +
-            "\"UserId\":\"" + ticket.getUserId() + "\"" +
+            "\"UserId\":\"" + ticket.getUserId() + "\"," +
+            "\"Attending\":\"" + ticket.isAttending() + "\"" +
         "}";
         Unirest.post("https://sophiadb-1e63.restdb.io/rest/attendees")
                 .header("content-type", "application/json")
